@@ -1,12 +1,10 @@
 
 /*
-BUGS TO FIX:
 
-- flagged tile doesnt unflag when revealed, account for minecount
+BUGS TO FIX:
 - placing mines algorithm
 
 FEATURES TO ADD:
-- minecount
 - timer
 - game over
 - space to cycle-click
@@ -39,17 +37,20 @@ class TileBoard {
 	totalMines
 	/** @type {Tile[]} */ tiles
 	revealedTiles
+	mineCount
 
 	constructor() {
 		this.revealedTiles = 0
 		this.tiles = [];
 	}
 
-	initTiles(width, height, mineCount) {
+	initTiles(width, height, mineAmount) {
 		this.width = width
 		this.height = height
-		this.totalMines = mineCount
+		this.totalMines = mineAmount
+		this.mineCount = mineAmount
 		this.revealedTiles = 0
+		this.updateMineCounter()
 
 		const tilesContainer = document.getElementById("tiles-container")
 		tilesContainer.style.setProperty("--cols", this.width)
@@ -129,19 +130,14 @@ class TileBoard {
 		tile.hasMine = false
 	}
 
-	revealTileAt(x, y) {
+	revealTileAt(x, y, singleTile = false) {
 		const tile = this.getTileAt(x, y)
 
 		if (tile) {
-
 			// First click
 			if (this.revealedTiles <= 0) {
 				const safeTiles = tile.getNeighbours()
 				safeTiles.push(tile)
-
-				// if (tile.hasMine) {
-				//     this.relocateMineAt(tile.x, tile.y)
-				// }
 
 				safeTiles.forEach((safeTile) => {
 					if (safeTile.hasMine) {
@@ -151,9 +147,14 @@ class TileBoard {
 				this.updateAllImages()
 			}
 
-			tile.reveal()
+			if (tile.flagged) {
+				this.flagTileAt(tile.x, tile.y, false)
+			}
 
-			if (tile.isEmpty()) {
+			tile.reveal()
+			this.revealedTiles++
+
+			if (tile.isEmpty() && ! singleTile) {
 				this.#floodRevealEmptyTiles(x, y)
 			}
 		}
@@ -161,20 +162,34 @@ class TileBoard {
 
 	flagTileAt(x, y, overrideState = undefined) {
 		const tile = this.getTileAt(x, y)
-		if (tile === null) return
+		if (tile === null || tile.revealed) return
 
+		const previousState = tile.flagged
 		if (overrideState == undefined) {
 			tile.setFlagged(! tile.flagged)
 		} else {
 			tile.setFlagged(overrideState)
 		}
+		
+		if (tile.flagged != previousState) {
+			if (tile.flagged) {
+				this.mineCount--
+			} else {
+				this.mineCount++
+			}
+			this.updateMineCounter()
+		}
+	}
+
+	updateMineCounter() {
+		const mineCounter = document.getElementById("mine-counter")
+		mineCounter.innerText = this.mineCount.toString()
 	}
 
 	#floodRevealEmptyTiles(x, y, alreadyCoveredTiles = []) {
 		const tile = this.getTileAt(x, y)
 		if (! tile.revealed) {
-			tile.reveal()
-			this.revealedTiles++
+			this.revealTileAt(tile.x, tile.y, true)
 			alreadyCoveredTiles.push(this.#coordsToIndex(x, y))
 		}
 
@@ -195,8 +210,7 @@ class TileBoard {
 						this.#floodRevealEmptyTiles(targetX, targetY, alreadyCoveredTiles)
 					} else {
 						if (! targetTile.revealed) {
-							targetTile.reveal()
-							this.revealedTiles++
+							this.revealTileAt(targetTile.x, targetTile.y, true)
 							alreadyCoveredTiles.push(targetIndex)
 						}
 					}
