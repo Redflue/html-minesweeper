@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet" href="styles.css">
+
+	<title>Document</title>
+</head>
+<body>
+	<div id="centered-game">
+
+		<div class="game-controls inset-border">
+			<div class="d-flex grow-1 basis-0">
+				<p id="mine-counter" class="game-number">99</p>
+			</div>
+
+			<button id="restart-button">
+				<img src="images/restart-button/default.png" alt="PLAY">
+			</button>
+
+			<div class="d-flex justify-content-end grow-1 basis-0">
+				<p id="timer" class="game-number">0</p>
+			</div>
+		</div>
+
+		<div class="tile-grid inset-border" data-rows="15" data-cols="15" id="tiles-container">
+			<!-- Filled in with scripts -->
+		</div>
+	</div>
+
+	<script src="script.js"></script>
+</body>
+</html>

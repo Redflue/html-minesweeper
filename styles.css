@@ -1,0 +1,227 @@
+
+:root {
+	--back-inset-top: rgb(180, 180, 180);
+	--back-inset-bottom: rgb(240, 240, 240);
+	--back-color: rgb(222, 222, 222);
+	--back-revealed-color: rgb(212, 212, 212);
+}
+
+body {
+
+	background: linear-gradient(147deg,rgba(209, 214, 227, 1) 0%, rgba(54, 129, 158, 1) 36%, rgba(87, 108, 199, 1) 66%, rgba(122, 114, 133, 1) 100%);
+
+	overflow: hidden;
+	display: flex;
+
+	padding: 0;
+	margin: 0;
+
+	width: 100vw;
+	height: 100vh;
+
+	justify-content: center;
+	
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.game-controls {
+	display: flex;
+	/* padding: 2px; */
+
+	justify-content: space-between;
+	align-content: center;
+
+	& p {
+		margin: 0;
+	}
+}
+
+.d-flex {
+	display: flex;
+}
+
+.justify-content-end {
+	justify-content: end;
+}
+
+.game-number {
+	border: outset var(--back-inset-bottom) 2px;
+	background-color: rgb(82, 82, 82);
+	box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.35);
+	padding: 1px;
+	margin: 0;
+	min-width: 60px;
+
+	color: rgb(255, 0, 0);
+	user-select: none;
+	text-align: center;
+	align-content: center;
+	
+	font-weight: 700;
+	font-family: 'Courier New', Courier, monospace, sans-serif;
+	font-size: x-large;
+	letter-spacing: 1px;
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.35), 0 0 2px rgba(255, 0, 0);
+}
+
+.grow-1 {
+	flex-grow: 1;
+}
+
+.basis-0 {
+	flex-basis: 0;
+}
+
+#tiles-container {
+	min-width: 20px;
+	min-height: 20px;
+}
+
+.inset-border {
+	border: solid 4px;
+	/* border-radius: 2px; */
+	border-left-color: var(--back-inset-top);
+	border-top-color: var(--back-inset-top);
+	border-right-color: var(--back-inset-bottom);
+	border-bottom-color: var(--back-inset-bottom);
+}
+
+#restart-button {
+	background-color: var(--back-color);
+	aspect-ratio: 1 / 1;
+	width: 35px;
+	height: 35px;
+	padding: 3px;
+
+	/* border-radius: 2px; */
+	border: outset var(--back-inset-bottom) 2px;
+	
+	& img {
+		object-fit: fill;
+		width: 100%;
+		height: 100%;
+		user-select: none;
+		pointer-events: none;
+	}
+
+	&:hover {
+		filter: brightness(110%);
+		&:active {
+			border: inset var(--back-inset-bottom) 2px;
+		}
+	}
+	
+	&:active {
+		filter: brightness(90%);
+	}
+}
+
+#centered-game {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+
+	align-self: center;
+	box-shadow: 0 20px 30px rgba(0, 0, 0, 0.35);
+
+	background-color: var(--back-color);
+	padding: 5px;
+
+	border: solid 4px;
+	border-radius: 2px;
+	border-left-color: var(--back-inset-bottom);
+	border-top-color: var(--back-inset-bottom);
+	border-right-color: var(--back-inset-top);
+	border-bottom-color: var(--back-inset-top);
+}
+
+.tile-grid {
+
+	display: grid;
+	grid-template-rows: repeat(calc(var(--rows) - 1), auto);
+	grid-template-columns: repeat(calc(var(--cols) - 1), auto);
+	grid: auto;
+
+	/* gap: 4px; */
+	/* padding: 5px; */
+
+	width: min-content;
+	height: min-content;
+}
+
+.tile {
+	background-color: var(--back-color);
+	/* border-radius: 2px; */
+	border: solid 2px;
+	position: relative;
+
+	&.revealed {
+		background-color: var(--back-revealed-color);
+
+		border-left-color: var(--back-inset-top);
+		border-top-color: var(--back-inset-top);
+		border-right-color: var(--back-inset-bottom);
+		border-bottom-color: var(--back-inset-bottom);
+
+		& img.tile-flag {
+			display: none !important;
+		}
+	}
+
+	&:not(.revealed) {
+		border-left-color: var(--back-inset-bottom);
+		border-top-color: var(--back-inset-bottom);
+		border-right-color: var(--back-inset-top);
+		border-bottom-color: var(--back-inset-top);
+
+		& img.tile-type {
+			display: none;
+			/* opacity: 0.1; */
+		}
+
+		&:hover {
+			filter: brightness(110%);
+			/* outline: 2px solid white; */
+
+			&:active {
+				border-left-color: var(--back-inset-top);
+				border-top-color: var(--back-inset-top);
+				border-right-color: var(--back-inset-bottom);
+				border-bottom-color: var(--back-inset-bottom);
+			}
+		}
+
+		&:active {
+			filter: brightness(90%);
+		}
+
+
+		&:not(.flagged) {
+			& img.tile-flag {
+				display: none;
+			}
+		}
+	}
+
+	width: 20px;
+	height: 20px;
+	margin: 0;
+
+	grid-row-start: var(--y);
+	grid-row-end: calc(var(--y) + 1);
+
+	grid-column-start: var(--x);
+	grid-column-end: calc(var(--x) + 1);
+
+	& img {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		user-select: none;
+		pointer-events: none;
+	}
+
+	user-select: none;
+	-moz-user-select: none;
+	-webkit-user-drag: none;
+}
