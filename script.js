@@ -6,11 +6,14 @@ BUGS TO FIX:
 - placing mines algorithm
 
 FEATURES TO ADD:
-
+- minecount
+- timer
+- game over
 - space to cycle-click
 - the actual gameplay cycle
 - scroll to zoom
 - mid-click to pan
+- change face to dead when lost the game
 
 */
 
@@ -25,34 +28,32 @@ const extraFaces = [
 ]
 
 function getRandomIntInclusive(min, max) {
-  const minCeiled = Math.ceil(min);
-  const maxFloored = Math.floor(max);
-  return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled);
+  const minCeiled = Math.ceil(min)
+  const maxFloored = Math.floor(max)
+  return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled)
 }
 
 class TileBoard {
 	width
 	height
 	totalMines
-	tiles
+	/** @type {Tile[]} */ tiles
 	revealedTiles
 
-	// TODO: change these params to be in initTiles instead
-	constructor(width, height, totalMines) {
-		this.width = width
-		this.height = height
-		this.totalMines = totalMines
+	constructor() {
 		this.revealedTiles = 0
-
 		this.tiles = [];
 	}
 
-	initTiles() {
+	initTiles(width, height, mineCount) {
+		this.width = width
+		this.height = height
+		this.totalMines = mineCount
+		this.revealedTiles = 0
+
 		const tilesContainer = document.getElementById("tiles-container")
 		tilesContainer.style.setProperty("--cols", this.width)
 		tilesContainer.style.setProperty("--rows", this.height)
-
-		this.revealedTiles = 0
 
 		for (let y = 0; y < this.height; y++) {
 			for (let x = 0; x < this.width; x++) {
@@ -62,6 +63,15 @@ class TileBoard {
 				tilesContainer.appendChild(tile.div)
 			}
 		}
+	}
+
+	clear() {
+		this.tiles.forEach((tile) => {
+			tile.delete()
+		})
+
+		this.tiles.length = 0
+		this.tiles = []
 	}
 
 	placeMines() {
@@ -94,10 +104,10 @@ class TileBoard {
 	}
 
 	/**
-	 * Obtient la tuile aux coodonnées données
-	 * @param {number} x 
-	 * @param {number} y 
-	 * @returns {Tile|null} La tuile obtenue ou null si elle n'existe pas
+	 * Get the tile at the given coordinates
+	 * @param {number} x X coordinate
+	 * @param {number} y Y coordinate
+	 * @returns {Tile|null} The found tile or null if none exists at the location
 	 */
 	getTileAt(x, y) {
 		if (x >= this.width || y >= this.height) return null
@@ -336,6 +346,16 @@ class Tile {
 		}
 	}
 
+	delete() {
+		this.flagImage.remove()
+		this.typeImage.remove()
+		this.div.remove()
+
+		this.div = null
+		this.typeImage = null
+		this.flagImage = null
+	}
+
 	updateImage() {
 		if (this.hasMine) {
 			this.typeImage.src = "images/mine.png"
@@ -358,16 +378,24 @@ class Tile {
  * expert       : 30x16, 99 mines
  */
 
-const tileBoard = new TileBoard(30, 16, 99)
-tileBoard.initTiles()
+const tileBoard = new TileBoard()
+tileBoard.initTiles(30, 16, 99)
 tileBoard.placeMines()
 tileBoard.updateAllImages()
 
+const restartBtn = document.getElementById("restart-button")
+restartBtn.onclick = (ev) => {
+	tileBoard.clear()
+	tileBoard.initTiles(30, 16, 99)
+	tileBoard.placeMines()
+	tileBoard.updateAllImages()
 
-// TODO: reevaluate every new game
-if (getRandomIntInclusive(1, 3) == 1) {
 	const restartBtnImg = document.querySelector('#restart-button img')
-	const randomFaceIndex = getRandomIntInclusive(0, extraFaces.length - 1)
+	if (getRandomIntInclusive(1, 10) == 1) {
+		const randomFaceIndex = getRandomIntInclusive(0, extraFaces.length - 1)
 
-	restartBtnImg.src = `images/restart-button/${extraFaces[randomFaceIndex]}`
+		restartBtnImg.src = `images/restart-button/${extraFaces[randomFaceIndex]}`
+	} else {
+		restartBtnImg.src = "images/restart-button/default.png"
+	}
 }
