@@ -22,7 +22,13 @@ const extraFaces = [
 	"D-face.png",
 	"stare.png",
 	"surprised.png",
-	"surprised-pikachu.png"
+	"surprised-pikachu.png",
+	"dark-stare.png",
+	"epic-face.png",
+	"goatee.png",
+	"homer.png",
+	"pacperson.png",
+	"zombie.png",
 ]
 
 function getRandomIntInclusive(min, max) {
