@@ -168,6 +168,10 @@ body {
 		}
 	}
 
+	&.mine-exploded {
+		background-color: rgb(231, 66, 24);
+	}
+
 	&:not(.revealed) {
 		border-left-color: var(--back-inset-bottom);
 		border-top-color: var(--back-inset-bottom);
@@ -175,8 +179,8 @@ body {
 		border-bottom-color: var(--back-inset-top);
 
 		& img.tile-type {
-			display: none;
-			/* opacity: 0.1; */
+			/* display: none; */
+			opacity: 0;
 		}
 
 		&:hover {
@@ -224,4 +228,11 @@ body {
 	user-select: none;
 	-moz-user-select: none;
 	-webkit-user-drag: none;
+}
+
+#tiles-container {
+	&.reveal-mines .tile.mined:not(.flagged):not(.revealed) img.tile-type {
+		/* display: block !important; */
+		opacity: 0.5 !important;
+	}
 }

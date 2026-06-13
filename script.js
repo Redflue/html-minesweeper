@@ -3,9 +3,11 @@
 
 BUGS TO FIX:
 - placing mines algorithm
+- first click image flicker
 
 FEATURES TO ADD:
 - game over
+- winning
 - space to cycle-click
 - the actual gameplay cycle
 - scroll to zoom
@@ -45,10 +47,13 @@ class TileBoard {
 	mineCount
 	startTime = null
 	endTime = null
+	gameOver = false
+	tilesContainer = null
 
 	constructor() {
 		this.revealedTiles = 0
 		this.tiles = [];
+		this.tilesContainer = document.getElementById("tiles-container")
 
 		setInterval(() => {this.#updateTimer()}, 0.5)
 	}
@@ -78,20 +83,21 @@ class TileBoard {
 		this.revealedTiles = 0
 		this.updateMineCounter()
 
+		this.gameOver = false
 		this.startTime = null
 		this.endTime = null
 		this.#updateTimer()
 
-		const tilesContainer = document.getElementById("tiles-container")
-		tilesContainer.style.setProperty("--cols", this.width)
-		tilesContainer.style.setProperty("--rows", this.height)
+		this.tilesContainer.classList.remove("reveal-mines")
+		this.tilesContainer.style.setProperty("--cols", this.width)
+		this.tilesContainer.style.setProperty("--rows", this.height)
 
 		for (let y = 0; y < this.height; y++) {
 			for (let x = 0; x < this.width; x++) {
 				let tile = new Tile(x, y, this)
 				this.tiles.push(tile)
 
-				tilesContainer.appendChild(tile.div)
+				this.tilesContainer.appendChild(tile.div)
 			}
 		}
 	}
@@ -158,11 +164,14 @@ class TileBoard {
 	}
 
 	revealTileAt(x, y, singleTile = false) {
+		if (this.gameOver) return
+
 		const tile = this.getTileAt(x, y)
 
 		if (tile) {
-			// First click
 			if (this.revealedTiles <= 0) {
+				// First click
+
 				const safeTiles = tile.getNeighbours()
 				safeTiles.push(tile)
 
@@ -183,13 +192,28 @@ class TileBoard {
 			tile.reveal()
 			this.revealedTiles++
 
+			if (tile.hasMine) {
+				// Game over
+
+				this.#loseGame(tile)
+			}
+
 			if (tile.isEmpty() && ! singleTile) {
 				this.#floodRevealEmptyTiles(x, y)
 			}
 		}
 	}
 
+	#loseGame(tile) {
+		this.gameOver = true
+		this.endTime = Date.now()
+		tile.explode()
+		this.tilesContainer.classList.add("reveal-mines")
+	}
+
 	flagTileAt(x, y, overrideState = undefined) {
+		if (this.gameOver) return
+
 		const tile = this.getTileAt(x, y)
 		if (tile === null || tile.revealed) return
 
@@ -333,6 +357,10 @@ class Tile {
 		this.div.oncontextmenu = (ev) => {ev.preventDefault()}
 	}
 
+	explode() {
+		this.div.classList.add("mine-exploded")
+	}
+
 	/**
 	 * 
 	 * @returns {Tile[]}
@@ -401,9 +429,11 @@ class Tile {
 
 	updateImage() {
 		if (this.hasMine) {
+			this.div.classList.add("mined")
 			this.typeImage.src = "images/mine.png"
 			return
 		}
+		this.div.classList.remove("mined")
 
 		const mineCount = this.countSurroundingMines()
 		if (mineCount < 1) {
