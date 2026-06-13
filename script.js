@@ -5,7 +5,6 @@ BUGS TO FIX:
 - placing mines algorithm
 
 FEATURES TO ADD:
-- timer
 - game over
 - space to cycle-click
 - the actual gameplay cycle
@@ -44,10 +43,31 @@ class TileBoard {
 	/** @type {Tile[]} */ tiles
 	revealedTiles
 	mineCount
+	startTime = null
+	endTime = null
 
 	constructor() {
 		this.revealedTiles = 0
 		this.tiles = [];
+
+		setInterval(() => {this.#updateTimer()}, 0.5)
+	}
+
+	#updateTimer() {
+		const timerElem = document.getElementById("timer")
+
+		if (this.startTime !== null) {
+			const upperLimitTime = this.endTime ?? Date.now()
+			const displayTime = Math.round((upperLimitTime - this.startTime) / 1000)
+
+			if (displayTime > 999) {
+				timerElem.innerText = "999+"
+			} else {
+				timerElem.innerText = displayTime.toString()
+			}
+		} else {
+			timerElem.innerText = "0"
+		}
 	}
 
 	initTiles(width, height, mineAmount) {
@@ -57,6 +77,10 @@ class TileBoard {
 		this.mineCount = mineAmount
 		this.revealedTiles = 0
 		this.updateMineCounter()
+
+		this.startTime = null
+		this.endTime = null
+		this.#updateTimer()
 
 		const tilesContainer = document.getElementById("tiles-container")
 		tilesContainer.style.setProperty("--cols", this.width)
@@ -126,9 +150,6 @@ class TileBoard {
 	}
 
 	relocateMineAt(x, y, safeTiles = []) {
-
-		// TODO: fix corner relocation bug
-
 		const tile = this.getTileAt(x, y)
 
 		const emptyTile = this.tiles.find((oTile) => ! oTile.hasMine && ! safeTiles.includes(oTile))
@@ -151,6 +172,8 @@ class TileBoard {
 					}
 				})
 				this.updateAllImages()
+
+				this.startTime = Date.now()
 			}
 
 			if (tile.flagged) {
